@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const { graphqlHTTP } = require('express-graphql');
-const schema = require('./graphql/schema'); // Asegúrate de que la ruta sea correcta
+const schema = require('./graphql/schema'); 
 
 const app = express();
 
@@ -20,7 +20,7 @@ app.use(express.json());
 // Middleware de GraphQL
 app.use('/graphql', graphqlHTTP({
   schema: schema,
-  graphiql: true // Activar interfaz GraphiQL
+  graphiql: true 
 }));
 
 // Ruta inicial

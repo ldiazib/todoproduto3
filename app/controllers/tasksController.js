@@ -4,7 +4,7 @@ const Task = require('../models/task');
 exports.createTask = async (req, res) => {
   try {
     const { titulo, descripcion, estado, fecha, responsable, panelId } = req.body;
-    const filePath = req.file ? `/uploads/${req.file.filename}` : null; // Ruta del archivo subido
+    const filePath = req.file ? `/uploads/${req.file.filename}` : null; 
 
     const task = new Task({
       titulo,

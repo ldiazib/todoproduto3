@@ -19,7 +19,7 @@ function volverAlDashboard() {
     
       const tableros = JSON.parse(localStorage.getItem("tableros")) || [];
       const nuevoTablero = { 
-        id: tableros.length.toString(), // Genera un ID único basado en el índice
+        id: tableros.length.toString(), 
         titulo, 
         descripcion, 
         usuario, 

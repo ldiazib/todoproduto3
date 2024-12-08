@@ -2,7 +2,7 @@
 const params = new URLSearchParams(window.location.search);
 const tableroId = params.get("tablero");
 
-console.log(`Tablero ID desde la URL: ${tableroId}`); // Log para depuración
+console.log(`Tablero ID desde la URL: ${tableroId}`); 
 
 // Verificar si el tablero existe
 const tableros = JSON.parse(localStorage.getItem("tableros")) || [];
@@ -32,62 +32,62 @@ function guardarTareasEnLocalStorage() {
   const tableroIndex = tableros.findIndex((tablero) => tablero.id === tableroActual.id);
 
   if (tableroIndex !== -1) {
-    tableros[tableroIndex].tareas = tareas; // Actualizar las tareas del tablero actual
-    localStorage.setItem("tableros", JSON.stringify(tableros)); // Guardar todos los tableros
+    tableros[tableroIndex].tareas = tareas; 
+    localStorage.setItem("tableros", JSON.stringify(tableros)); 
   } else {
     console.error("Error: Tablero actual no encontrado en localStorage");
   }
 }
 
 function volverAlDashboard() {
-  window.location.href = "/app/public/index.html"; // Redirige al dashboard
+  window.location.href = "/app/public/index.html"; 
 }
 
 // Funciones de Drag & Drop para tareas
 function allowDrop(ev) {
-  ev.preventDefault(); // Permitir que el elemento sea soltado
+  ev.preventDefault(); 
 }
 
 function highlightColumn(ev) {
   ev.preventDefault();
   const column = ev.target.closest(".seccion-tareas");
   if (column) {
-    column.classList.add("hovered"); // Agregar clase de resaltado
+    column.classList.add("hovered"); 
   }
 }
 
 function removeHighlight(ev) {
   const column = ev.target.closest(".seccion-tareas");
   if (column) {
-    column.classList.remove("hovered"); // Quitar clase de resaltado
+    column.classList.remove("hovered"); 
   }
 }
 
 function drag(ev) {
-  ev.dataTransfer.setData("text", ev.target.id); // Almacenar el ID de la tarea arrastrada
+  ev.dataTransfer.setData("text", ev.target.id); 
   ev.target.classList.add("dragging");
 }
 
 function endDrag(ev) {
-  ev.target.classList.remove("dragging"); // Eliminar clase de arrastre
+  ev.target.classList.remove("dragging"); 
 }
 
 function drop(ev) {
   ev.preventDefault();
-  const data = ev.dataTransfer.getData("text"); // Obtener el ID de la tarea
-  const task = document.getElementById(data); // Seleccionar la tarea por ID
-  const dropTarget = ev.target.closest(".seccion-tareas"); // Identificar la columna donde se suelta
+  const data = ev.dataTransfer.getData("text"); 
+  const task = document.getElementById(data); 
+  const dropTarget = ev.target.closest(".seccion-tareas"); 
 
   if (dropTarget && task) {
-    dropTarget.appendChild(task); // Añadir tarea a la columna
+    dropTarget.appendChild(task);
     dropTarget.classList.remove("hovered");
 
     // Actualizar estado de la tarea
-    const nuevoEstado = dropTarget.id.replace("-column", ""); // Obtener el nuevo estado
+    const nuevoEstado = dropTarget.id.replace("-column", "");
     const tarea = tareas.find((t) => t.id === task.id);
     if (tarea) {
-      tarea.estado = nuevoEstado; // Actualizar estado
-      guardarTareasEnLocalStorage(); // Guardar cambios en localStorage
+      tarea.estado = nuevoEstado; 
+      guardarTareasEnLocalStorage();
     }
   }
 }
@@ -122,8 +122,8 @@ document.getElementById("formNuevaTarea")?.addEventListener("submit", function (
     estado: "to-do",
   };
 
-  tareas.push(nuevaTarea); // Añadir tarea al array del tablero actual
-  guardarTareasEnLocalStorage(); // Guardar en localStorage
+  tareas.push(nuevaTarea); 
+  guardarTareasEnLocalStorage(); 
 
   agregarTareaAColumna(nuevaTarea, document.getElementById("to-do-column"));
 
@@ -180,8 +180,8 @@ document
 
   // Función para abrir el modal de modificar tarea
   function abrirModalModificar(idTarea) {
-    tareaParaModificar = idTarea; // Guardar el ID de la tarea a modificar
-    const tarea = tareas.find((t) => t.id === idTarea); // Buscar la tarea en el array global
+    tareaParaModificar = idTarea; 
+    const tarea = tareas.find((t) => t.id === idTarea); 
   
     if (tarea) {
       // Rellenar el formulario del modal con los datos de la tarea
@@ -205,7 +205,7 @@ document
   document
     .getElementById("formModificarTarea")
     ?.addEventListener("submit", function (event) {
-      event.preventDefault(); // Evitar el envío del formulario
+      event.preventDefault(); 
   
       const nuevoTitulo = document.getElementById("tituloModificarTarea").value;
       const nuevaDescripcion = document.getElementById(
@@ -226,7 +226,7 @@ document
         tarea.hora = nuevaHora;
         tarea.responsable = nuevoResponsable;
   
-        guardarTareasEnLocalStorage(); // Guardar los cambios en localStorage
+        guardarTareasEnLocalStorage(); 
   
         // Actualizar la tarea visualmente en el DOM
         const tareaDiv = document.getElementById(tarea.id);
@@ -253,14 +253,14 @@ const form = document.getElementById("formNuevaTarea");
 
 if (form) {
   form.addEventListener("submit", async function (event) {
-    event.preventDefault(); // Evitar recarga de la página
+    event.preventDefault(); 
 
     const tituloTarea = document.getElementById("tituloTarea").value.trim();
     const descripcionTarea = document.getElementById("descripcionTarea").value.trim();
     const fechaTarea = document.getElementById("fechaTarea").value.trim();
     const horaTarea = document.getElementById("horaTarea").value.trim();
     const responsableTarea = document.getElementById("responsableTarea").value.trim();
-    const archivoTarea = document.getElementById("fileTarea").files[0]; // Archivo adjunto
+    const archivoTarea = document.getElementById("fileTarea").files[0]; 
 
     if (!tituloTarea || !descripcionTarea || !fechaTarea || !horaTarea || !responsableTarea) {
       alert("Por favor, completa todos los campos.");
@@ -274,20 +274,19 @@ if (form) {
     formData.append("fecha", fechaTarea);
     formData.append("hora", horaTarea);
     formData.append("responsable", responsableTarea);
-    formData.append("file", archivoTarea); // Agregar el archivo al FormData
+    formData.append("file", archivoTarea); 
 
     try {
       const response = await fetch("http://localhost:4000/api/tasks", {
         method: "POST",
-        body: formData, // Enviar FormData al servidor
+        body: formData, 
       });
 
       const data = await response.json();
 
       if (response.ok) {
         console.log("Tarea creada con éxito:", data);
-        form.reset(); // Reiniciar el formulario
-        // Lógica para actualizar la UI, como recargar las tareas
+        form.reset(); 
         cargarTareas();
       } else {
         console.error("Error al crear la tarea:", data.error);
@@ -313,7 +312,7 @@ async function cargarTareas() {
       const tareas = data.data.tasks;
       console.log("Tareas cargadas:", tareas);
 
-      // Lógica para mostrar tareas en el DOM
+      
       tareas.forEach((tarea) => {
         const columna = document.getElementById(`${tarea.estado}-column`);
         if (columna) {
@@ -357,7 +356,7 @@ async function eliminarTarea(id) {
 
     if (response.ok) {
       console.log("Tarea eliminada con éxito.");
-      document.getElementById(id)?.remove(); // Eliminar del DOM
+      document.getElementById(id)?.remove(); 
     } else {
       console.error("Error al eliminar la tarea.");
     }

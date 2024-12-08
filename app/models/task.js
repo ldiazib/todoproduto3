@@ -7,7 +7,7 @@ const TaskSchema = new mongoose.Schema({
   fecha: { type: Date },
   responsable: { type: String },
   panelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Panel', required: true },
-  filePath: { type: String }, // Ruta del archivo subido
+  filePath: { type: String }, 
   creadoEn: { type: Date, default: Date.now }
 });
 
