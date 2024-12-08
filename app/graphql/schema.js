@@ -1,37 +1,116 @@
-const { gql } = require('apollo-server-express');
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLList, GraphQLSchema, GraphQLNonNull } = require('graphql');
+const Panel = require('../models/panel');
+const Task = require('../models/task');
 
-const typeDefs = gql`
-  type Query {
-    panels: [Panel!]
-    panel(id: ID!): Panel
-    tasks: [Task!]
-    task(id: ID!): Task
+// Definición de tipo Panel
+const PanelType = new GraphQLObjectType({
+  name: 'Panel',
+  fields: () => ({
+    id: { type: GraphQLID },
+    titulo: { type: GraphQLString },
+    descripcion: { type: GraphQLString },
+    usuario: { type: GraphQLString },
+    creadoEn: { type: GraphQLString }
+  })
+});
+
+// Definición de tipo Task
+const TaskType = new GraphQLObjectType({
+  name: 'Task',
+  fields: () => ({
+    id: { type: GraphQLID },
+    titulo: { type: GraphQLString },
+    descripcion: { type: GraphQLString },
+    estado: { type: GraphQLString },
+    fecha: { type: GraphQLString },
+    responsable: { type: GraphQLString },
+    panelId: { type: GraphQLID },
+    creadoEn: { type: GraphQLString },
+    filePath: { type: GraphQLString }
+  })
+});
+
+// Root Query
+const RootQuery = new GraphQLObjectType({
+  name: 'RootQueryType',
+  fields: {
+    panels: {
+      type: new GraphQLList(PanelType),
+      resolve() {
+        return Panel.find();
+      }
+    },
+    panel: {
+      type: PanelType,
+      args: { id: { type: GraphQLID } },
+      resolve(parent, args) {
+        return Panel.findById(args.id);
+      }
+    },
+    tasks: {
+      type: new GraphQLList(TaskType),
+      resolve() {
+        return Task.find();
+      }
+    },
+    task: {
+      type: TaskType,
+      args: { id: { type: GraphQLID } },
+      resolve(parent, args) {
+        return Task.findById(args.id);
+      }
+    }
   }
+});
 
-  input PanelInput {
-    titulo: String!
-    descripcion: String!
-    usuario: String!
+// Mutations
+const Mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addPanel: {
+      type: PanelType,
+      args: {
+        titulo: { type: new GraphQLNonNull(GraphQLString) },
+        descripcion: { type: new GraphQLNonNull(GraphQLString) },
+        usuario: { type: new GraphQLNonNull(GraphQLString) }
+      },
+      resolve(parent, args) {
+        const panel = new Panel({
+          titulo: args.titulo,
+          descripcion: args.descripcion,
+          usuario: args.usuario
+        });
+        return panel.save();
+      }
+    },
+    addTask: {
+      type: TaskType,
+      args: {
+        titulo: { type: new GraphQLNonNull(GraphQLString) },
+        descripcion: { type: GraphQLString },
+        estado: { type: GraphQLString },
+        fecha: { type: GraphQLString },
+        responsable: { type: GraphQLString },
+        panelId: { type: new GraphQLNonNull(GraphQLID) },
+        filePath: { type: GraphQLString }
+      },
+      resolve(parent, args) {
+        const task = new Task({
+          titulo: args.titulo,
+          descripcion: args.descripcion,
+          estado: args.estado,
+          fecha: args.fecha,
+          responsable: args.responsable,
+          panelId: args.panelId,
+          filePath: args.filePath
+        });
+        return task.save();
+      }
+    }
   }
+});
 
-  input TaskInput {
-    titulo: String!
-    descripcion: String!
-    fecha: String!
-    hora: String!
-    responsable: String!
-    filePath: String
-  }
-
-  type Mutation {
-    createPanel(panel: PanelInput!): Panel!
-    updatePanel(id: ID!, panel: PanelInput): Panel!
-    deletePanel(id: ID!): String
-
-    createTask(task: TaskInput!): Task!
-    updateTask(id: ID!, task: TaskInput): Task!
-    deleteTask(id: ID!): String
-  }
-`;
-
-module.exports = typeDefs;
+module.exports = new GraphQLSchema({
+  query: RootQuery,
+  mutation: Mutation
+});

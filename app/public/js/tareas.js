@@ -248,114 +248,120 @@ document
       modal.hide();
     });
 
+// Formulario para crear una nueva tarea con archivo adjunto
+const form = document.getElementById("formNuevaTarea");
 
-    const query = `
-    query {
-        tasks {
-            id
-            titulo
-            descripcion
-            fecha
-            hora
-            responsable
-            estado
-        }
-    }`
-    const form = document.getElementById("formNuevaTarea");
+if (form) {
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault(); // Evitar recarga de la página
 
-    if (form) {
-      form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Evitar que la página se recargue
-        
-        const tituloTarea = document.getElementById("tituloTarea").value.trim();
-        const descripcionTarea = document.getElementById("descripcionTarea").value.trim();
-        const fechaTarea = document.getElementById("fechaTarea").value.trim();
-        const horaTarea = document.getElementById("horaTarea").value.trim();
-        const responsableTarea = document.getElementById("responsableTarea").value.trim();
-        
-        console.log('Valores capturados:', { tituloTarea, descripcionTarea, fechaTarea, horaTarea, responsableTarea });
-    
-        if (!tituloTarea || !descripcionTarea || !fechaTarea || !horaTarea || !responsableTarea) {
-          alert('Por favor, completa todos los campos.');
-          return;
-        }
-    
-        const mutation = `
-          mutation CreateTask($titulo: String!, $descripcion: String!, $fecha: String!, $hora: String!, $responsable: String!) {
-            createTask(titulo: $titulo, descripcion: $descripcion, fecha: $fecha, hora: $hora, responsable: $responsable) {
-              id
-              titulo
-              descripcion
-              fecha
-              hora
-              responsable
-            }
-          }
-        `;
-    
-        const variables = {
-          titulo: tituloTarea,
-          descripcion: descripcionTarea,
-          fecha: fechaTarea,
-          hora: horaTarea,
-          responsable: responsableTarea
-        };
-    
-        fetch('http://localhost:4000/graphql', {
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: mutation, variables })
-        })
-        .then(res => res.json())
-        .then(data => {
-          console.log('Respuesta:', data);
-          form.reset();
-        })
-        .catch(error => console.error('Error en la solicitud:', error));
+    const tituloTarea = document.getElementById("tituloTarea").value.trim();
+    const descripcionTarea = document.getElementById("descripcionTarea").value.trim();
+    const fechaTarea = document.getElementById("fechaTarea").value.trim();
+    const horaTarea = document.getElementById("horaTarea").value.trim();
+    const responsableTarea = document.getElementById("responsableTarea").value.trim();
+    const archivoTarea = document.getElementById("fileTarea").files[0]; // Archivo adjunto
+
+    if (!tituloTarea || !descripcionTarea || !fechaTarea || !horaTarea || !responsableTarea) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    // Crear un objeto FormData para incluir el archivo
+    const formData = new FormData();
+    formData.append("titulo", tituloTarea);
+    formData.append("descripcion", descripcionTarea);
+    formData.append("fecha", fechaTarea);
+    formData.append("hora", horaTarea);
+    formData.append("responsable", responsableTarea);
+    formData.append("file", archivoTarea); // Agregar el archivo al FormData
+
+    try {
+      const response = await fetch("http://localhost:4000/api/tasks", {
+        method: "POST",
+        body: formData, // Enviar FormData al servidor
       });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Tarea creada con éxito:", data);
+        form.reset(); // Reiniciar el formulario
+        // Lógica para actualizar la UI, como recargar las tareas
+        cargarTareas();
+      } else {
+        console.error("Error al crear la tarea:", data.error);
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
     }
-    
-    const mutationUpdateTask = `
-  mutation UpdateTask($id: ID!, $titulo: String, $descripcion: String, $fecha: String, $hora: String, $responsable: String) {
-    updateTask(id: $id, titulo: $titulo, descripcion: $descripcion, fecha: $fecha, hora: $hora, responsable: $responsable) {
-      id
-      titulo
-      descripcion
-      fecha
-      hora
-      responsable
-    }
-  }
-`;
-
-const mutationDeleteTask = `
-  mutation DeleteTask($id: ID!) {
-    deleteTask(id: $id)
-  }
-`;
-
-function modificarTarea(id, titulo, descripcion, fecha, hora, responsable) {
-  const variables = { id, titulo, descripcion, fecha, hora, responsable };
-
-  fetch('http://localhost:4000/graphql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: mutationUpdateTask, variables })
-  })
-  .then(res => res.json())
-  .then(data => console.log('Tarea modificada:', data))
-  .catch(error => console.error('Error al modificar tarea:', error));
+  });
 }
 
-function eliminarTarea(id) {
-  const variables = { id };
+// Función para cargar tareas desde el servidor
+async function cargarTareas() {
+  try {
+    const response = await fetch("http://localhost:4000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: query }),
+    });
 
-  fetch('http://localhost:4000/graphql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: mutationDeleteTask, variables })
-  })
-  .then(res => res.json())
-  .then(data => console.log('Tarea eliminada:', data))
-  .catch(error => console.error('Error al eliminar tarea:', error));
+    const data = await response.json();
+
+    if (response.ok) {
+      const tareas = data.data.tasks;
+      console.log("Tareas cargadas:", tareas);
+
+      // Lógica para mostrar tareas en el DOM
+      tareas.forEach((tarea) => {
+        const columna = document.getElementById(`${tarea.estado}-column`);
+        if (columna) {
+          agregarTareaAColumna(tarea, columna);
+        }
+      });
+    } else {
+      console.error("Error al cargar tareas:", data.errors);
+    }
+  } catch (error) {
+    console.error("Error al cargar tareas:", error);
+  }
+}
+
+// Función para agregar tarea al DOM
+function agregarTareaAColumna(tarea, columna) {
+  const tareaDiv = document.createElement("div");
+  tareaDiv.classList.add("tarea");
+  tareaDiv.setAttribute("id", tarea.id);
+
+  tareaDiv.innerHTML = `
+    <p><strong>Título:</strong> ${tarea.titulo}</p>
+    <p><strong>Descripción:</strong> ${tarea.descripcion}</p>
+    <p><strong>Fecha:</strong> ${tarea.fecha}</p>
+    <p><strong>Hora:</strong> ${tarea.hora}</p>
+    <p><strong>Responsable:</strong> ${tarea.responsable}</p>
+    ${tarea.filePath ? `<p><a href="${tarea.filePath}" target="_blank">Archivo Adjunto</a></p>` : ""}
+    <button class="btn btn-danger btn-sm" onclick="eliminarTarea('${tarea.id}')">Eliminar</button>
+    <button class="btn btn-warning btn-sm" onclick="abrirModalModificar('${tarea.id}')">Modificar</button>
+  `;
+
+  columna.appendChild(tareaDiv);
+}
+
+// Función para eliminar tarea
+async function eliminarTarea(id) {
+  try {
+    const response = await fetch("http://localhost:4000/api/tasks/" + id, {
+      method: "DELETE",
+    });
+
+    if (response.ok) {
+      console.log("Tarea eliminada con éxito.");
+      document.getElementById(id)?.remove(); // Eliminar del DOM
+    } else {
+      console.error("Error al eliminar la tarea.");
+    }
+  } catch (error) {
+    console.error("Error en la solicitud:", error);
+  }
 }

@@ -16,7 +16,7 @@ function cargarTableros() {
       }
     `;
 
-    fetch('http://127.0.0.1:4000/graphql', {
+    fetch('http://localhost:4000/graphql', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
@@ -68,7 +68,7 @@ document.getElementById("botonConfirmarEliminarTablero")?.addEventListener("clic
 
         const variables = { id: tableroParaEliminar };
 
-        fetch('http://127.0.0.1:4000/graphql', {
+        fetch('http://localhost:4000/graphql', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: mutation, variables })
@@ -94,6 +94,17 @@ document.getElementById("botonConfirmarEliminarTablero")?.addEventListener("clic
 // Cargar tableros al cargar la página
 document.addEventListener("DOMContentLoaded", cargarTableros);
 
+const query = `
+  query {
+    panels {
+      id
+      titulo
+      descripcion
+      usuario
+    }
+  }
+`;
+
 // Mutación para crear un nuevo panel
 const mutation = `
   mutation CreatePanel($titulo: String!, $descripcion: String!, $usuario: String!) {
@@ -111,7 +122,7 @@ const variables = {
   usuario: "admin"
 };
 
-fetch('http://127.0.0.1:4000/graphql', {
+fetch('http://localhost:4000/graphql', {
   method: 'POST', 
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ query: mutation, variables })

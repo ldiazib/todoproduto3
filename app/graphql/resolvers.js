@@ -1,5 +1,5 @@
-const { createPanel, updatePanel, deletePanel } = require('./controllers/panelController');
-const { createTask, updateTask, deleteTask } = require('./controllers/tasksController');
+const { createPanel, updatePanel, deletePanel } = require('../controllers/panelController');
+const { createTask, updateTask, deleteTask } = require('../controllers/tasksController');
 
 const resolvers = {
   Query: {
@@ -15,7 +15,7 @@ const resolvers = {
     createTask: async (_, { task }) => await createTask(task.titulo, task.descripcion, task.fecha, task.hora, task.responsable, task.filePath),
     updateTask: async (_, { id, task }) => await updateTask(id, task),
     deleteTask: async (_, { id }) => await deleteTask(id),
-  }
+  },
 };
 
 module.exports = resolvers;
