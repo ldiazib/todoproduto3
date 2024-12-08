@@ -84,3 +84,44 @@ function volverAlDashboard() {
     .catch(error => console.error('Error en la solicitud:', error));
   });
   
+  const mutationUpdatePanel = `
+  mutation UpdatePanel($id: ID!, $titulo: String, $descripcion: String, $usuario: String) {
+    updatePanel(id: $id, titulo: $titulo, descripcion: $descripcion, usuario: $usuario) {
+      id
+      titulo
+      descripcion
+    }
+  }
+`;
+
+const mutationDeletePanel = `
+  mutation DeletePanel($id: ID!) {
+    deletePanel(id: $id)
+  }
+`;
+
+function modificarPanel(id, titulo, descripcion, usuario) {
+  const variables = { id, titulo, descripcion, usuario };
+
+  fetch('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: mutationUpdatePanel, variables })
+  })
+  .then(res => res.json())
+  .then(data => console.log('Panel modificado:', data))
+  .catch(error => console.error('Error al modificar panel:', error));
+}
+
+function eliminarPanel(id) {
+  const variables = { id };
+
+  fetch('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: mutationDeletePanel, variables })
+  })
+  .then(res => res.json())
+  .then(data => console.log('Panel eliminado:', data))
+  .catch(error => console.error('Error al eliminar panel:', error));
+}

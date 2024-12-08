@@ -1,38 +1,32 @@
-const Panel = require('../models/panel'); // Importa el modelo Panel
+const Panel = require('../models/panel');
 
-// Función para crear un nuevo panel
 const createPanel = async (titulo, descripcion, usuario) => {
   try {
-    const panel = new Panel({
-      titulo,
-      descripcion,
-      usuario,
-    });
-    return await panel.save();  // Guarda el panel en la base de datos y lo devuelve
+    const panel = new Panel({ titulo, descripcion, usuario });
+    return await panel.save();
   } catch (error) {
-    console.error('Error al crear el panel:', error);
-    throw new Error('Error al crear el panel');
+    console.error('Error creando panel:', error);
+    throw new Error('Error creando panel');
   }
 };
 
-// Función para obtener todos los paneles
-const getPanels = async () => {
+const updatePanel = async (id, updates) => {
   try {
-    return await Panel.find();  // Devuelve todos los paneles desde la base de datos
+    return await Panel.findByIdAndUpdate(id, updates, { new: true });
   } catch (error) {
-    console.error('Error al obtener los paneles:', error);
-    throw new Error('Error al obtener los paneles');
+    console.error('Error actualizando panel:', error);
+    throw new Error('Error actualizando panel');
   }
 };
 
-// Función para obtener un panel específico por su ID
-const getPanelById = async (id) => {
+const deletePanel = async (id) => {
   try {
-    return await Panel.findById(id);  // Busca el panel por su ID y lo devuelve
+    await Panel.findByIdAndDelete(id);
+    return `Panel con id ${id} eliminado`;
   } catch (error) {
-    console.error('Error al obtener el panel por ID:', error);
-    throw new Error('Error al obtener el panel por ID');
+    console.error('Error eliminando panel:', error);
+    throw new Error('Error eliminando panel');
   }
 };
 
-module.exports = { createPanel, getPanels, getPanelById };
+module.exports = { createPanel, updatePanel, deletePanel };

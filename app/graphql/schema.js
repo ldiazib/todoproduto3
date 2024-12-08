@@ -8,27 +8,30 @@ const typeDefs = gql`
     task(id: ID!): Task
   }
 
-  type Panel {
-    id: ID!
+  input PanelInput {
     titulo: String!
     descripcion: String!
     usuario: String!
   }
 
-  type Task {
-    id: ID!
+  input TaskInput {
     titulo: String!
     descripcion: String!
     fecha: String!
     hora: String!
     responsable: String!
-    estado: String!
+    filePath: String
   }
 
   type Mutation {
-  createPanel(titulo: String!, descripcion: String!, usuario: String!): Panel!
-  createTask(titulo: String!, descripcion: String!, fecha: String!, hora: String!, responsable: String!): Task!
-}  }
+    createPanel(panel: PanelInput!): Panel!
+    updatePanel(id: ID!, panel: PanelInput): Panel!
+    deletePanel(id: ID!): String
+
+    createTask(task: TaskInput!): Task!
+    updateTask(id: ID!, task: TaskInput): Task!
+    deleteTask(id: ID!): String
+  }
 `;
 
 module.exports = typeDefs;

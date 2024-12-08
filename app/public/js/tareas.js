@@ -315,3 +315,47 @@ document
       });
     }
     
+    const mutationUpdateTask = `
+  mutation UpdateTask($id: ID!, $titulo: String, $descripcion: String, $fecha: String, $hora: String, $responsable: String) {
+    updateTask(id: $id, titulo: $titulo, descripcion: $descripcion, fecha: $fecha, hora: $hora, responsable: $responsable) {
+      id
+      titulo
+      descripcion
+      fecha
+      hora
+      responsable
+    }
+  }
+`;
+
+const mutationDeleteTask = `
+  mutation DeleteTask($id: ID!) {
+    deleteTask(id: $id)
+  }
+`;
+
+function modificarTarea(id, titulo, descripcion, fecha, hora, responsable) {
+  const variables = { id, titulo, descripcion, fecha, hora, responsable };
+
+  fetch('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: mutationUpdateTask, variables })
+  })
+  .then(res => res.json())
+  .then(data => console.log('Tarea modificada:', data))
+  .catch(error => console.error('Error al modificar tarea:', error));
+}
+
+function eliminarTarea(id) {
+  const variables = { id };
+
+  fetch('http://localhost:4000/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: mutationDeleteTask, variables })
+  })
+  .then(res => res.json())
+  .then(data => console.log('Tarea eliminada:', data))
+  .catch(error => console.error('Error al eliminar tarea:', error));
+}

@@ -1,24 +1,47 @@
+require('dotenv').config();
 const express = require('express');
-const { ApolloServer } = require('apollo-server-express');
-const connectDB = require('./config/database');
-const typeDefs = require('./graphql/schema');
-const resolvers = require('./graphql/resolvers');
 const cors = require('cors');
+const multer = require('multer'); // Asegurarse de que multer esté importado
+const { graphqlHTTP } = require('express-graphql');
+const mongoose = require('mongoose');
+const path = require('path');
+const schema = require(path.resolve(__dirname, './graphql/schema.js')); 
 
-const app = express();
+// **Definir la app de Express ANTES de usarla**
+const app = express(); 
+const PORT = process.env.PORT || 4000;
+
+// Configuración de multer para la subida de archivos
+const upload = multer({ dest: 'uploads/' });
+
+// Rutas de subida de archivos (se asegura que 'app' ya esté inicializado)
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({ error: 'No se ha subido ningún archivo.' });
+  }
+  res.send({ filePath: `/uploads/${req.file.filename}` });
+});
+
+// Configuración de CORS para aceptar solicitudes POST
 app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
 
-const server = new ApolloServer({ typeDefs, resolvers });
+// Conectar con MongoDB
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Conectado a MongoDB'))
+  .catch(err => console.error('Error al conectar a MongoDB', err));
 
-async function startServer() {
-  await server.start(); // Asegúrate de que Apollo Server esté listo
-  server.applyMiddleware({ app, path: '/graphql' });
+// Configurar el servidor GraphQL
+app.use('/graphql', graphqlHTTP({
+  schema,
+  graphiql: true
+}));
 
-  connectDB(); // Conectar a la base de datos (asegúrate de que está bien configurado)
+// Ruta para manejar errores 404
+app.use('*', (req, res) => {
+  res.status(404).send('Ruta no encontrada');
+});
 
-  app.listen(4000, () => {
-    console.log('🚀 Servidor corriendo en http://localhost:4000/graphql');
-  });
-}
-
-startServer();
+// Iniciar el servidor
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor escuchando en http://127.0.0.1:${PORT}/graphql`);
+});

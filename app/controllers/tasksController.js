@@ -1,42 +1,32 @@
-const Task = require('../models/task'); // Importa el modelo Task
+const Task = require('../models/task');
 
-// Función para crear una nueva tarea
-const createTask = async (titulo, descripcion, fecha, hora, responsable, estado = 'to-do') => {
+const createTask = async (titulo, descripcion, fecha, hora, responsable, filePath) => {
   try {
-    const task = new Task({
-      titulo,
-      descripcion,
-      fecha: new Date(fecha), // 👈 Asegúrate de que la fecha esté bien
-      hora,
-      responsable,
-      estado, // 👈 Estado ahora se establece dinámicamente
-    });
+    const task = new Task({ titulo, descripcion, fecha, hora, responsable, filePath });
     return await task.save();
   } catch (error) {
-    console.error('Error al crear la tarea:', error);
-    throw new Error('Error al crear la tarea');
+    console.error('Error creando tarea:', error);
+    throw new Error('Error creando tarea');
   }
 };
 
-
-// Función para obtener todas las tareas
-const getTasks = async () => {
+const updateTask = async (id, updates) => {
   try {
-    return await Task.find();  // Devuelve todas las tareas desde la base de datos
+    return await Task.findByIdAndUpdate(id, updates, { new: true });
   } catch (error) {
-    console.error('Error al obtener las tareas:', error);
-    throw new Error('Error al obtener las tareas');
+    console.error('Error actualizando tarea:', error);
+    throw new Error('Error actualizando tarea');
   }
 };
 
-// Función para obtener una tarea específica por su ID
-const getTaskById = async (id) => {
+const deleteTask = async (id) => {
   try {
-    return await Task.findById(id);  // Busca la tarea por su ID y la devuelve
+    await Task.findByIdAndDelete(id);
+    return `Tarea con id ${id} eliminada`;
   } catch (error) {
-    console.error('Error al obtener la tarea por ID:', error);
-    throw new Error('Error al obtener la tarea por ID');
+    console.error('Error eliminando tarea:', error);
+    throw new Error('Error eliminando tarea');
   }
 };
 
-module.exports = { createTask, getTasks, getTaskById };
+module.exports = { createTask, updateTask, deleteTask };

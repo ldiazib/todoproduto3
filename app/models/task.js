@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const TaskSchema = new mongoose.Schema({
   titulo: { type: String, required: true },
   descripcion: { type: String, required: true },
@@ -5,7 +7,7 @@ const TaskSchema = new mongoose.Schema({
   hora: { type: String, required: true },
   responsable: { type: String, required: true },
   estado: { type: String, default: 'to-do' },
+  filePath: { type: String, required: false } // Ruta donde se guarda el archivo
 });
 
-const Task = mongoose.model('Task', TaskSchema);
-module.exports = Task;
+module.exports = mongoose.model('Task', TaskSchema);
