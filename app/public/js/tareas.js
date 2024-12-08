@@ -364,3 +364,27 @@ async function eliminarTarea(id) {
     console.error("Error en la solicitud:", error);
   }
 }
+
+const socket = io('http://localhost:4000');
+
+socket.on('newTask', (task) => {
+  agregarTareaAColumna(task, document.getElementById("to-do-column"));
+});
+
+socket.on('updateTask', (task) => {
+  const tareaDiv = document.getElementById(task.id);
+  if (tareaDiv) {
+    tareaDiv.innerHTML = `
+      <p><strong>Título:</strong> ${task.titulo}</p>
+      <p><strong>Descripción:</strong> ${task.descripcion}</p>
+      <p><strong>Fecha:</strong> ${task.fecha}</p>
+      <p><strong>Hora:</strong> ${task.hora}</p>
+      <p><strong>Responsable:</strong> ${task.responsable}</p>
+      ${task.filePath ? `<p><a href="${task.filePath}" target="_blank">Archivo Adjunto</a></p>` : ""}
+    `;
+  }
+});
+
+socket.on('deleteTask', (id) => {
+  document.getElementById(id)?.remove();
+});

@@ -17,6 +17,9 @@ exports.createTask = async (req, res) => {
     });
 
     await task.save();
+
+req.io.emit('newTask', task);
+
     res.status(201).json(task);
   } catch (error) {
     console.error('Error al crear la tarea:', error);
@@ -56,9 +59,7 @@ exports.updateTask = async (req, res) => {
 
     const task = await Task.findByIdAndUpdate(id, updatedFields, { new: true });
 
-    if (!task) {
-      return res.status(404).json({ error: 'Tarea no encontrada' });
-    }
+    req.io.emit('updateTask', task);
 
     res.json(task);
   } catch (error) {
@@ -72,9 +73,7 @@ exports.deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
     const task = await Task.findByIdAndDelete(id);
-    if (!task) {
-      return res.status(404).json({ error: 'Tarea no encontrada' });
-    }
+    req.io.emit('deleteTask', id);
     res.json({ message: 'Tarea eliminada correctamente' });
   } catch (error) {
     console.error('Error al eliminar la tarea:', error);

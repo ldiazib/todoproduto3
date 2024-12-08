@@ -3,8 +3,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { graphqlHTTP } = require('express-graphql');
 const schema = require('./graphql/schema'); 
+const { Server } = require('socket.io');
+const http = require('http');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 const mongoURI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 4000;
@@ -28,7 +37,11 @@ app.get('/', (req, res) => {
   res.send('Servidor funcionando correctamente. Visita /graphql para acceder a GraphiQL');
 });
 
+io.on('connection', (socket) => {
+  console.log('Usuario conectado', socket.id);
+});
+
 // Iniciar el servidor
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}/graphql`);
 });
