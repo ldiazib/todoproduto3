@@ -16,7 +16,7 @@ function cargarTableros() {
       }
     `;
 
-    fetch('http://localhost:4000/graphql', {
+    fetch('/graphql', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
@@ -70,7 +70,7 @@ document.getElementById("botonConfirmarEliminarTablero")?.addEventListener("clic
 
         const variables = { id: tableroParaEliminar };
 
-        fetch('http://localhost:4000/graphql', {
+        fetch('/graphql', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: mutation, variables })
@@ -124,7 +124,7 @@ const variables = {
   usuario: "admin"
 };
 
-fetch('http://localhost:4000/graphql', {
+fetch('/graphql', {
   method: 'POST', 
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ query: mutation, variables })

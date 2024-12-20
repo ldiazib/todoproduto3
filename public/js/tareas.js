@@ -26,7 +26,7 @@ const query = `
 // Function to fetch tablero information
 async function fetchTableroInfo(tableroId) {
   try {
-    const response = await fetch("http://localhost:4000/graphql", {
+    const response = await fetch("/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -155,7 +155,7 @@ async function drop(ev) {
     `;
 
     try {
-      const response = await fetch("http://localhost:4000/graphql", {
+      const response = await fetch("/graphql", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: mutation }),
@@ -220,7 +220,7 @@ document.getElementById("formNuevaTarea")?.addEventListener("submit", async func
   `;
 
   try {
-    const response = await fetch("http://localhost:4000/graphql", {
+    const response = await fetch("/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: mutation }),
@@ -297,7 +297,7 @@ document
       `;
 
       try {
-        const response = await fetch("http://localhost:4000/graphql", {
+        const response = await fetch("/graphql", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: mutation }),
@@ -336,7 +336,7 @@ document
     `;
 
     try {
-      const response = await fetch("http://localhost:4000/graphql", {
+      const response = await fetch("/graphql", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: queryTarea }),
@@ -409,7 +409,7 @@ document
       `;
 
       try {
-        const response = await fetch("http://localhost:4000/graphql", {
+        const response = await fetch("/graphql", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: mutation }),
@@ -463,7 +463,7 @@ if (form) {
     formData.append("file", archivoTarea); 
 
     try {
-      const response = await fetch("http://localhost:4000/api/tasks", {
+      const response = await fetch("/api/tasks", {
         method: "POST",
         body: formData, 
       });
@@ -496,7 +496,7 @@ function cleanColumn(estado) {
 // Función para cargar tareas desde el servidor
 async function cargarTareas() {
   try {
-    const response = await fetch("http://localhost:4000/graphql", {
+    const response = await fetch("/graphql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: query }),
@@ -531,7 +531,7 @@ async function cargarTareas() {
 // Función para eliminar tarea
 async function eliminarTarea(id) {
   try {
-    const response = await fetch("http://localhost:4000/api/tasks/" + id, {
+    const response = await fetch("/api/tasks/" + id, {
       method: "DELETE",
     });
 
@@ -546,7 +546,8 @@ async function eliminarTarea(id) {
   }
 }
 
-const socket = io('http://localhost:4000');
+
+const socket = io('');
 
 socket.on('newTask', (task) => {
   agregarTareaAColumna(task, document.getElementById("to-do-column"));

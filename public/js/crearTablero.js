@@ -67,7 +67,7 @@ function volverAlDashboard() {
   
     const variables = { titulo, descripcion, usuario };
   
-    fetch('http://localhost:4000/graphql', {
+    fetch('/graphql', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: mutation, variables }),
@@ -103,7 +103,7 @@ const mutationDeletePanel = `
 function modificarPanel(id, titulo, descripcion, usuario) {
   const variables = { id, titulo, descripcion, usuario };
 
-  fetch('http://localhost:4000/graphql', {
+  fetch('/graphql', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query: mutationUpdatePanel, variables })
@@ -116,7 +116,7 @@ function modificarPanel(id, titulo, descripcion, usuario) {
 function eliminarPanel(id) {
   const variables = { id };
 
-  fetch('http://localhost:4000/graphql', {
+  fetch('/graphql', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query: mutationDeletePanel, variables })

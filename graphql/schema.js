@@ -67,7 +67,7 @@ const RootQuery = new GraphQLObjectType({
       return Task.find({ panelId: args.panelId });
       }
     },
-  task: {
+    task: {
       type: TaskType,
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
