@@ -149,16 +149,6 @@ function drop(ev) {
   }
 }
 
-// Función para cargar tareas en las columnas correspondientes
-function cargarTareas() {
-  tareas.forEach((tarea) => {
-    const columna = document.getElementById(`${tarea.estado}-column`);
-    if (columna) {
-      agregarTareaAColumna(tarea, columna);
-    }
-  });
-}
-
 // Crear nueva tarea y añadirla a la columna "To Do"
 document.getElementById("formNuevaTarea")?.addEventListener("submit", async function (event) {
   event.preventDefault();
@@ -278,16 +268,47 @@ document
   });
 
   // Función para abrir el modal de modificar tarea
-  function abrirModalModificar(idTarea) {
+  async function abrirModalModificar(idTarea) {
     tareaParaModificar = idTarea; 
-    const tarea = tareas.find((t) => t.id === idTarea); 
-  
+
+    const queryTarea = `
+      query {
+        task(id: "${idTarea}") {
+          id
+          titulo
+          descripcion
+          fecha
+          hora
+          responsable
+          estado
+        }
+      }
+    `;
+
+    try {
+      const response = await fetch("http://localhost:4000/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: queryTarea }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        tarea = data.data.task;
+      } else {
+        console.error("Error al obtener la tarea:", data.errors);
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
+    }
+
     if (tarea) {
       // Rellenar el formulario del modal con los datos de la tarea
       document.getElementById("tituloModificarTarea").value = tarea.titulo;
       document.getElementById("descripcionModificarTarea").value =
         tarea.descripcion;
-      document.getElementById("fechaModificarTarea").value = tarea.fecha;
+      document.getElementById("fechaModificarTarea").value = new Date(parseInt(tarea.fecha)).toISOString().split('T')[0];
       document.getElementById("horaModificarTarea").value = tarea.hora;
       document.getElementById("responsableModificarTarea").value =
         tarea.responsable;
@@ -303,7 +324,7 @@ document
   // Función para guardar los cambios de la tarea modificada
   document
     .getElementById("formModificarTarea")
-    ?.addEventListener("submit", function (event) {
+    ?.addEventListener("submit", async function (event) {
       event.preventDefault(); 
   
       const nuevoTitulo = document.getElementById("tituloModificarTarea").value;
@@ -315,29 +336,45 @@ document
       const nuevoResponsable = document.getElementById(
         "responsableModificarTarea"
       ).value;
-  
-      // Buscar y actualizar la tarea en el array global
-      const tarea = tareas.find((t) => t.id === tareaParaModificar);
-      if (tarea) {
-        tarea.titulo = nuevoTitulo;
-        tarea.descripcion = nuevaDescripcion;
-        tarea.fecha = nuevaFecha;
-        tarea.hora = nuevaHora;
-        tarea.responsable = nuevoResponsable;
-  
-        guardarTareasEnLocalStorage(); 
-  
-        // Actualizar la tarea visualmente en el DOM
-        const tareaDiv = document.getElementById(tarea.id);
-        tareaDiv.innerHTML = `
-          <p><strong>Título:</strong> ${tarea.titulo}</p>
-          <p><strong>Descripción:</strong> ${tarea.descripcion}</p>
-          <p><strong>Fecha:</strong> ${tarea.fecha}</p>
-          <p><strong>Hora:</strong> ${tarea.hora}</p>
-          <p><strong>Responsable:</strong> ${tarea.responsable}</p>
-          <button class="btn btn-danger btn-sm" onclick="abrirModalEliminar('${tarea.id}')">Eliminar</button>
-          <button class="btn btn-warning btn-sm" onclick="abrirModalModificar('${tarea.id}')">Modificar</button>
-        `;
+
+      const mutation = `
+        mutation {
+          updateTask(
+            id: "${tareaParaModificar}",
+            titulo: "${nuevoTitulo}",
+            descripcion: "${nuevaDescripcion}",
+            fecha: "${nuevaFecha}",
+            hora: "${nuevaHora}",
+            responsable: "${nuevoResponsable}"
+          ) {
+            id
+            titulo
+            descripcion
+            fecha
+            hora
+            responsable
+            estado
+          }
+        }
+      `;
+
+      try {
+        const response = await fetch("http://localhost:4000/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: mutation }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log("Tarea actualizada con éxito:", data.data.updateTask);
+          cargarTareas();
+        } else {
+          console.error("Error al actualizar la tarea:", data.errors);
+        }
+      } catch (error) {
+        console.error("Error en la solicitud:", error);
       }
   
       // Cerrar el modal de modificación
@@ -415,6 +452,9 @@ async function cargarTareas() {
       
       tareas.forEach((tarea) => {
         const columna = document.getElementById(`${tarea.estado}-column`);
+        const tareasEnColumna = columna.querySelectorAll(".tarea");
+        tareasEnColumna.forEach(tarea => tarea.remove());
+        
         if (columna) {
           agregarTareaAColumna(tarea, columna);
         }

@@ -5,6 +5,7 @@ const TaskSchema = new mongoose.Schema({
   descripcion: { type: String },
   estado: { type: String, enum: ['to-do', 'doing', 'done'], default: 'to-do' },
   fecha: { type: Date },
+  hora: { type: String },
   responsable: { type: String },
   panelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Panel', required: true },
   filePath: { type: String }, 

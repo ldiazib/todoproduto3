@@ -97,6 +97,36 @@ const Mutation = new GraphQLObjectType({
         return panel.save();
       }
     },
+    updateTask: {
+      type: TaskType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        titulo: { type: GraphQLString },
+        descripcion: { type: GraphQLString },
+        estado: { type: GraphQLString },
+        fecha: { type: GraphQLString },
+        hora: { type: GraphQLString },
+        responsable: { type: GraphQLString },
+        filePath: { type: GraphQLString }
+      },
+      resolve(parent, args) {
+        return Task.findByIdAndUpdate(
+          args.id,
+          {
+            $set: {
+              titulo: args.titulo,
+              descripcion: args.descripcion,
+              estado: args.estado,
+              fecha: args.fecha,
+              hora: args.hora,
+              responsable: args.responsable,
+              filePath: args.filePath
+            }
+          },
+          { new: true }
+        );
+      }
+    },
     addTask: {
       type: TaskType,
       args: {
