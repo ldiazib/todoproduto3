@@ -152,6 +152,15 @@ const Mutation = new GraphQLObjectType({
         });
         return task.save();
       }
+    },
+    deleteTask: {
+      type: TaskType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) }
+      },
+      resolve(parent, args) {
+        return Task.deleteOne({ _id: args.id });
+      }
     }
   }
 });

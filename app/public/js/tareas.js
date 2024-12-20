@@ -281,15 +281,39 @@ function abrirModalEliminar(idTarea) {
 // Eliminar tarea
 document
   .getElementById("botonConfirmarEliminar")
-  ?.addEventListener("click", function () {
+  ?.addEventListener("click", async function () {
     if (tareaParaEliminar !== null) {
-      document.getElementById(tareaParaEliminar).remove();
-      tareas = tareas.filter((tarea) => tarea.id !== tareaParaEliminar);
-      guardarTareasEnLocalStorage();
       const confirmarEliminarModal = bootstrap.Modal.getInstance(
         document.getElementById("modalConfirmarEliminar")
       );
       confirmarEliminarModal.hide();
+
+      const mutation = `
+        mutation {
+          deleteTask(id: "${tareaParaEliminar}") {
+            id
+          }
+        }
+      `;
+
+      try {
+        const response = await fetch("http://localhost:4000/graphql", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: mutation }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log("Tarea eliminada con éxito:", data.data.deleteTask);
+          cargarTareas();
+        } else {
+          console.error("Error al eliminar la tarea:", data.errors);
+        }
+      } catch (error) {
+        console.error("Error en la solicitud:", error);
+      }
     }
   });
 
@@ -513,7 +537,7 @@ async function eliminarTarea(id) {
 
     if (response.ok) {
       console.log("Tarea eliminada con éxito.");
-      document.getElementById(id)?.remove(); 
+      cargarTareas();
     } else {
       console.error("Error al eliminar la tarea.");
     }
