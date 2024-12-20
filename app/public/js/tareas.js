@@ -129,7 +129,7 @@ function endDrag(ev) {
   ev.target.classList.remove("dragging"); 
 }
 
-function drop(ev) {
+async function drop(ev) {
   ev.preventDefault();
   const data = ev.dataTransfer.getData("text"); 
   const task = document.getElementById(data); 
@@ -141,11 +141,37 @@ function drop(ev) {
 
     // Actualizar estado de la tarea
     const nuevoEstado = dropTarget.id.replace("-column", "");
-    const tarea = tareas.find((t) => t.id === task.id);
-    if (tarea) {
-      tarea.estado = nuevoEstado; 
-      guardarTareasEnLocalStorage();
+
+    const mutation = `
+      mutation {
+        updateTask(
+          id: "${task.id}",
+          estado: "${nuevoEstado}"
+        ) {
+          id
+          estado
+        }
+      }
+    `;
+
+    try {
+      const response = await fetch("http://localhost:4000/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: mutation }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Estado de la tarea actualizado con éxito:", data.data.updateTask);
+      } else {
+        console.error("Error al actualizar el estado de la tarea:", data.errors);
+      }
+    } catch (error) {
+      console.error("Error en la solicitud:", error);
     }
+
   }
 }
 
@@ -433,6 +459,16 @@ if (form) {
   });
 }
 
+function cleanColumn(estado) {
+  const column = document.getElementById(`${estado}-column`);
+  if (column) {
+    const tasks = column.getElementsByClassName('tarea');
+    while (tasks.length > 0) {
+      tasks[0].remove();
+    }
+  }
+}
+
 // Función para cargar tareas desde el servidor
 async function cargarTareas() {
   try {
@@ -449,14 +485,15 @@ async function cargarTareas() {
       const tareas = panel.tasks;
       console.log("Tareas cargadas:", tareas);
 
-      
+      cleanColumn("doing");
+      cleanColumn("done");
+      cleanColumn("to-do");
+
+    
       tareas.forEach((tarea) => {
         const columna = document.getElementById(`${tarea.estado}-column`);
-        const tareasEnColumna = columna.querySelectorAll(".tarea");
-        tareasEnColumna.forEach(tarea => tarea.remove());
-        
         if (columna) {
-          agregarTareaAColumna(tarea, columna);
+            agregarTareaAColumna(tarea, columna);
         }
       });
     } else {
@@ -465,26 +502,6 @@ async function cargarTareas() {
   } catch (error) {
     console.error("Error al cargar tareas:", error);
   }
-}
-
-// Función para agregar tarea al DOM
-function agregarTareaAColumna(tarea, columna) {
-  const tareaDiv = document.createElement("div");
-  tareaDiv.classList.add("tarea");
-  tareaDiv.setAttribute("id", tarea.id);
-
-  tareaDiv.innerHTML = `
-    <p><strong>Título:</strong> ${tarea.titulo}</p>
-    <p><strong>Descripción:</strong> ${tarea.descripcion}</p>
-    <p><strong>Fecha:</strong> ${tarea.fecha}</p>
-    <p><strong>Hora:</strong> ${tarea.hora}</p>
-    <p><strong>Responsable:</strong> ${tarea.responsable}</p>
-    ${tarea.filePath ? `<p><a href="${tarea.filePath}" target="_blank">Archivo Adjunto</a></p>` : ""}
-    <button class="btn btn-danger btn-sm" onclick="eliminarTarea('${tarea.id}')">Eliminar</button>
-    <button class="btn btn-warning btn-sm" onclick="abrirModalModificar('${tarea.id}')">Modificar</button>
-  `;
-
-  columna.appendChild(tareaDiv);
 }
 
 // Función para eliminar tarea
