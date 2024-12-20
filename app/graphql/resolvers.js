@@ -5,7 +5,7 @@ const resolvers = {
   Query: {
     panels: async () => await getPanels(),
     panel: async (_, { id }) => await getPanelById(id),
-    tasks: async () => await getTasks(),
+    tasks: async (_, { panelId }) => await getTasks(panelId),
     task: async (_, { id }) => await getTaskById(id),
   },
   Mutation: {

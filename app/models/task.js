@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const TaskSchema = new mongoose.Schema({
   titulo: { type: String, required: true },
   descripcion: { type: String },
-  estado: { type: String, enum: ['pendiente', 'en progreso', 'completado'], default: 'pendiente' },
+  estado: { type: String, enum: ['to-do', 'doing', 'done'], default: 'to-do' },
   fecha: { type: Date },
   responsable: { type: String },
   panelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Panel', required: true },

@@ -10,7 +10,13 @@ const PanelType = new GraphQLObjectType({
     titulo: { type: GraphQLString },
     descripcion: { type: GraphQLString },
     usuario: { type: GraphQLString },
-    creadoEn: { type: GraphQLString }
+    creadoEn: { type: GraphQLString },
+    tasks: {
+      type: new GraphQLList(TaskType),
+      resolve(parent, args) {
+      return Task.find({ panelId: parent.id });
+      }
+    }
   })
 });
 
@@ -23,6 +29,7 @@ const TaskType = new GraphQLObjectType({
     descripcion: { type: GraphQLString },
     estado: { type: GraphQLString },
     fecha: { type: GraphQLString },
+    hora: { type: GraphQLString },
     responsable: { type: GraphQLString },
     panelId: { type: GraphQLID },
     creadoEn: { type: GraphQLString },
@@ -53,7 +60,14 @@ const RootQuery = new GraphQLObjectType({
         return Task.find();
       }
     },
-    task: {
+    tasksByPanel: {
+      type: new GraphQLList(TaskType),
+      args: { panelId: { type: GraphQLID } },
+      resolve(parent, args) {
+      return Task.find({ panelId: args.panelId });
+      }
+    },
+  task: {
       type: TaskType,
       args: { id: { type: GraphQLID } },
       resolve(parent, args) {
@@ -92,6 +106,7 @@ const Mutation = new GraphQLObjectType({
         fecha: { type: GraphQLString },
         responsable: { type: GraphQLString },
         panelId: { type: new GraphQLNonNull(GraphQLID) },
+        hora: { type: GraphQLString },
         filePath: { type: GraphQLString }
       },
       resolve(parent, args) {
@@ -100,6 +115,7 @@ const Mutation = new GraphQLObjectType({
           descripcion: args.descripcion,
           estado: args.estado,
           fecha: args.fecha,
+          hora: args.hora,
           responsable: args.responsable,
           panelId: args.panelId,
           filePath: args.filePath

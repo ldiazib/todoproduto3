@@ -1,5 +1,5 @@
 function volverAlDashboard() {
-    window.location.href = "/app/public/index.html";
+    window.location.href = "/index.html";
   }
   
   const form = document.getElementById("formCrearTablero");
@@ -28,7 +28,7 @@ function volverAlDashboard() {
       tableros.push(nuevoTablero);
       localStorage.setItem("tableros", JSON.stringify(tableros));
     
-      window.location.href = `/app/public/tareas.html?tablero=${nuevoTablero.id}`;
+      window.location.href = `/tareas.html?tablero=${nuevoTablero.id}`;
     });
     
   
@@ -78,7 +78,7 @@ function volverAlDashboard() {
         console.error('Errores de GraphQL:', data.errors);
       } else {
         console.log('Panel creado:', data.data.createPanel);
-        window.location.href = `/app/public/tareas.html?tablero=${data.data.createPanel.id}`;
+        window.location.href = `/tareas.html?tablero=${data.data.createPanel.id}`;
       }
     })
     .catch(error => console.error('Error en la solicitud:', error));

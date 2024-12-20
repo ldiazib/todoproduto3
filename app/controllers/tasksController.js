@@ -30,7 +30,7 @@ req.io.emit('newTask', task);
 // Obtener todas las tareas
 exports.getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
+    const tasks = await Task.find(req.params.panelId ? { panelId: req.params.panelId } : {});
     res.json(tasks);
   } catch (error) {
     console.error('Error al obtener las tareas:', error);

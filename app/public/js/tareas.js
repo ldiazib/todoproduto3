@@ -3,10 +3,67 @@ const params = new URLSearchParams(window.location.search);
 const tableroId = params.get("tablero");
 
 console.log(`Tablero ID desde la URL: ${tableroId}`); 
+// GraphQL query to get tablero information
+const query = `
+{
+  panel (id:"${tableroId}"){
+    id,
+    titulo,
+    descripcion,
+    tasks {
+      id,
+      titulo,
+      descripcion,
+      fecha,
+      hora,
+      responsable,
+      estado
+    }
+  }
+}
+`;
 
+// Function to fetch tablero information
+async function fetchTableroInfo(tableroId) {
+  try {
+    const response = await fetch("http://localhost:4000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: query,
+        variables: { id: tableroId },
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      const tablero = data.data;
+      console.log("Tablero cargado:", tablero);
+
+      if (tablero) {
+        tareas = tablero.tasks || [];
+        cargarTareas();
+      } else {
+        console.error(`Tablero no encontrado: ${tableroId}`);
+        alert("El tablero no existe.");
+        volverAlDashboard();
+      }
+    } else {
+      console.error("Error al cargar el tablero:", data.errors);
+    }
+  } catch (error) {
+    console.error("Error al cargar el tablero:", error);
+  }
+}
+
+// Fetch the tablero information
+fetchTableroInfo(tableroId);
 // Verificar si el tablero existe
+/*
 const tableros = JSON.parse(localStorage.getItem("tableros")) || [];
 const tableroActual = tableros.find((tablero) => tablero.id === tableroId);
+
 
 // Declarar la variable globalmente
 let tareas = [];
@@ -25,7 +82,7 @@ if (!tableroActual) {
   // Cargar tareas iniciales
   cargarTareas();
 }
-
+*/
 
 // Función para guardar las tareas del tablero actual en localStorage
 function guardarTareasEnLocalStorage() {
@@ -40,7 +97,7 @@ function guardarTareasEnLocalStorage() {
 }
 
 function volverAlDashboard() {
-  window.location.href = "/app/public/index.html"; 
+  window.location.href = "/index.html"; 
 }
 
 // Funciones de Drag & Drop para tareas
@@ -103,7 +160,7 @@ function cargarTareas() {
 }
 
 // Crear nueva tarea y añadirla a la columna "To Do"
-document.getElementById("formNuevaTarea")?.addEventListener("submit", function (event) {
+document.getElementById("formNuevaTarea")?.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   const tituloTarea = document.getElementById("tituloTarea").value;
@@ -112,7 +169,7 @@ document.getElementById("formNuevaTarea")?.addEventListener("submit", function (
   const horaTarea = document.getElementById("horaTarea").value;
   const responsableTarea = document.getElementById("responsableTarea").value;
 
-  const nuevaTarea = {
+  const newTask = {
     id: `tarea-${Date.now()}`,
     titulo: tituloTarea,
     descripcion: descripcionTarea,
@@ -120,12 +177,54 @@ document.getElementById("formNuevaTarea")?.addEventListener("submit", function (
     hora: horaTarea,
     responsable: responsableTarea,
     estado: "to-do",
+    panelId: tableroId
   };
 
-  tareas.push(nuevaTarea); 
-  guardarTareasEnLocalStorage(); 
+  const mutation = `
+    mutation {
+      addTask(
+        titulo: "${newTask.titulo}",
+        descripcion: "${newTask.descripcion}",
+        fecha: "${newTask.fecha}",
+        hora: "${newTask.hora}",
+        responsable: "${newTask.responsable}",
+        estado: "${newTask.estado}",
+        panelId: "${newTask.panelId}"
+      ) {
+        id
+        titulo
+        descripcion
+        fecha
+        hora
+        responsable
+        estado
+        panelId
+      }
+    }
+  `;
 
-  agregarTareaAColumna(nuevaTarea, document.getElementById("to-do-column"));
+  try {
+    const response = await fetch("http://localhost:4000/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: mutation }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Tarea creada con éxito:", data.data.createTask);
+      newTask.id = data.data.addTask.id; // Update the newTask with the ID from the server
+    } else {
+      console.error("Error al crear la tarea:", data.errors);
+    }
+  } catch (error) {
+    console.error("Error en la solicitud:", error);
+  }
+  tareas.push(newTask); 
+//  guardarTareasEnLocalStorage(); 
+
+  agregarTareaAColumna(newTask, document.getElementById("to-do-column"));
 
   document.getElementById("formNuevaTarea").reset();
   const modal = bootstrap.Modal.getInstance(document.getElementById("modalNuevaTarea"));
@@ -309,7 +408,8 @@ async function cargarTareas() {
     const data = await response.json();
 
     if (response.ok) {
-      const tareas = data.data.tasks;
+      const panel = data.data.panel;
+      const tareas = panel.tasks;
       console.log("Tareas cargadas:", tareas);
 
       

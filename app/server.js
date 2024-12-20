@@ -5,6 +5,7 @@ const { graphqlHTTP } = require('express-graphql');
 const schema = require('./graphql/schema'); 
 const { Server } = require('socket.io');
 const http = require('http');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +26,7 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Middleware
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware de GraphQL
 app.use('/graphql', graphqlHTTP({
@@ -34,7 +36,11 @@ app.use('/graphql', graphqlHTTP({
 
 // Ruta inicial
 app.get('/', (req, res) => {
-  res.send('Servidor funcionando correctamente. Visita /graphql para acceder a GraphiQL');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 io.on('connection', (socket) => {

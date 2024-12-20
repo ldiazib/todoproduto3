@@ -24,6 +24,8 @@ function cargarTableros() {
     .then(res => res.json())
     .then(data => {
       const tableros = data.data.panels;
+      localStorage.setItem("tableros", tableros);
+
       tablerosContainer.innerHTML = "";
 
       tableros.forEach((tablero) => {
@@ -47,7 +49,7 @@ function cargarTableros() {
 
 // Función para abrir tablero y redirigir a tareas.html
 function abrirTablero(tableroId) {
-    window.location.href = `/app/public/tareas.html?tablero=${tableroId}`;
+    window.location.href = `tareas.html?tablero=${tableroId}`;
 }
 
 // Función para mostrar el modal de confirmación de eliminación de tablero
